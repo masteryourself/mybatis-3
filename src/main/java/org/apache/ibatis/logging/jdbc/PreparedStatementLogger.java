@@ -67,6 +67,8 @@ public final class PreparedStatementLogger extends BaseJdbcLogger implements Inv
         return method.invoke(statement, params);
       } else if ("getResultSet".equals(method.getName())) {
         ResultSet rs = (ResultSet) method.invoke(statement, params);
+        // 如果能进入到这个 Logger 代理类执行方法，说明是被前面的 ConnectionLogger.invoke() 方法包装的，这里会继续用【ResultSetLogger】包装
+        // 【ResultSetLogger】的作用就是打印 ["     Total: "] 信息
         return rs == null ? null : ResultSetLogger.newInstance(rs, statementLog, queryStack);
       } else if ("getUpdateCount".equals(method.getName())) {
         int updateCount = (Integer) method.invoke(statement, params);

@@ -336,6 +336,9 @@ public abstract class BaseExecutor implements Executor {
 
   protected Connection getConnection(Log statementLog) throws SQLException {
     Connection connection = transaction.getConnection();
+    // statementLog 的 name 就是每一个具体的方法，如这里是：pers.masteryourself.tutorial.orm.mybatis.log.mapper.UserMapper.list
+    // 如果开启了 statementLog 开启了 debug 模式，就会使用【ConnectionLogger】包装它
+    // 【ConnectionLogger】的作用就是打印 [" Preparing: "] 信息
     if (statementLog.isDebugEnabled()) {
       return ConnectionLogger.newInstance(connection, statementLog, queryStack);
     } else {

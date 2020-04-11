@@ -29,6 +29,7 @@ public class Log4jImpl implements Log {
   private final Logger log;
 
   public Log4jImpl(String clazz) {
+    // 注意这里的 Logger 是来自 Log4J 中的 org.apache.log4j.Logger 对象
     log = Logger.getLogger(clazz);
   }
 

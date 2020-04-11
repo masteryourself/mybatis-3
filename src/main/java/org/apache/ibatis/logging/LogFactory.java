@@ -31,6 +31,7 @@ public final class LogFactory {
   private static Constructor<? extends Log> logConstructor;
 
   static {
+    // 优先级顺序：Slf4J > JCL > Log4J2 > Log4J > JUL > NoLogging
     tryImplementation(new Runnable() {
       @Override
       public void run() {
@@ -74,6 +75,7 @@ public final class LogFactory {
   }
 
   public static Log getLog(Class<?> aClass) {
+    // 调用构造方法创建对象
     return getLog(aClass.getName());
   }
 
@@ -118,8 +120,10 @@ public final class LogFactory {
   }
 
   private static void tryImplementation(Runnable runnable) {
+    // 如果 logConstructor 有值就直接不会再调用 run() 方法赋值了
     if (logConstructor == null) {
       try {
+        // 注意这里并不是调用 start() 方法开启多线程，而是同步调用 run() 方法
         runnable.run();
       } catch (Throwable t) {
         // ignore
@@ -130,10 +134,12 @@ public final class LogFactory {
   private static void setImplementation(Class<? extends Log> implClass) {
     try {
       Constructor<? extends Log> candidate = implClass.getConstructor(String.class);
+      // 通过反射调用构造方法，看看是否抛出异常
       Log log = candidate.newInstance(LogFactory.class.getName());
       if (log.isDebugEnabled()) {
         log.debug("Logging initialized using '" + implClass + "' adapter.");
       }
+      // 如果调用构造方法实例化成功，表示当前环境中有这个类，否则肯定会抛出异常，找不到该类，给 logConstructor 赋值
       logConstructor = candidate;
     } catch (Throwable t) {
       throw new LogException("Error setting Log implementation.  Cause: " + t, t);
